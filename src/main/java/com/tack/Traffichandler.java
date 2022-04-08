@@ -95,7 +95,12 @@ public class Traffichandler  {
                             return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.invalid_load_request);
 
                         }else {
-                            return newFixedLengthResponse(NanoHTTPD.Response.Status.OK,MIME_JSON,Transanction_messages.loading);
+                            if (Util.isOverWeight()){
+                                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.medication_is_over_drone_capacity);
+
+                            }else {
+                                return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, MIME_JSON, Transanction_messages.loading);
+                            }
 
                         }
                     } catch (SQLException e) {
@@ -165,5 +170,29 @@ public class Traffichandler  {
             return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.key_not_found);
         }
 
+    }
+
+    public static class BatteryLevelHandler extends RouterNanoHTTPD.GeneralHandler{
+        @Override
+        public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+            if (session.getParameters().containsKey("json")){
+                //Todo
+                String data = session.getParameters().get("json").get(0);
+                if (!Util.isDataJson(data)){
+                    return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.bad_syntax);
+
+                }else{
+                    return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.bad_syntax);
+
+                }
+
+            }else{
+            return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_PLAINTEXT," ");
+            }
+        }
+        @Override
+        public NanoHTTPD.Response post(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+            return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_PLAINTEXT," ");
+        }
     }
 }

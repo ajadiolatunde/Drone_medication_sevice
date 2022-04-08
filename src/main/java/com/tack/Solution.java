@@ -22,6 +22,7 @@ public class Solution extends RouterNanoHTTPD {
         addRoute("/register",Traffichandler.RegistrationHandler.class);
         addRoute("/selectdronemedication",Traffichandler.AvailableDroneHandler.class);
         addRoute("/loaditems",Traffichandler.ItemHandler.class);
+        addRoute("/batterylevel",Traffichandler.BatteryLevelHandler.class);
         addRoute("/image/*",Traffichandler.FileHandler.class);
 
         // todo

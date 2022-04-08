@@ -9,6 +9,7 @@ public class Transanction_messages {
     public static String duplicate_serial_number  = "{\"status\":\"failed\",\"message\":\"Duplicate serial number\"}";
     public static String success  = "{\"status\":\"success\",\"message\":\"Entry successful\"}";
     public static String loading = "{\"status\":\"success\",\"message\":\"Status changed to loading\"}";
+    public static String medication_is_over_drone_capacity = "{\"status\":\"failed\",\"message\":\"Medication is over drone capacity\"}";
 
 
 

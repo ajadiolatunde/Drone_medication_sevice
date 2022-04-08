@@ -3,6 +3,7 @@ package com.tack;
 import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.ls.LSInput;
 
 import java.lang.reflect.Field;
 import java.sql.SQLException;
@@ -11,10 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Util {
-
-
     static String[] STATE={"IDLE", "LOADING", "LOADED", "DELIVERING", "DELIVERED", "RETURNING"};
-    static String[] MODELS ={"Lightweight", "Middleweight", "Cruiserweight", "Heavyweight"};
+    public static String[] MODELS ={"Lightweight", "Middleweight", "Cruiserweight", "Heavyweight"};
     public static String getUserDir(){
         final String dir = System.getProperty("user.dir");
         return  dir+"/src/main/resources";
@@ -45,7 +44,6 @@ public class Util {
      * **/
     //Ensure recieved data is proper json object
 
-
     public static boolean isDataJson(String data, boolean isregistration_task){
         System.out.println("------"+data);
 
@@ -70,7 +68,7 @@ public class Util {
                 }
 
             }else{
-                //todo lookup drone and medication id in the db
+                // lookup drone and medication id in the sent js data
                 if (!jsonObject.has("drone") && !jsonObject.has("medication")){
                     return false;
                 }
@@ -83,6 +81,12 @@ public class Util {
 
             return false;
         }
+    }
+
+    //Ensure request to obtain a drone records is json formatted
+    public static boolean isDataJson(String data){
+        //Todo
+        return true;
     }
 
     //check drone data field compliance
@@ -139,10 +143,25 @@ public class Util {
 
         return false;
     }
-
-    public static boolean isOverWeight(JSONObject drone_js, JSONObject medication_js){
-        //- model (Lightweight, Middleweight, Cruiserweight, Heavyweight);
-       // - weight limit (500gr max);
+    //Subject the request to weight test
+    // models (Lightweight, Middleweight, Cruiserweight, Heavyweight);
+    public static boolean isOverWeight(){
+        Drone drone = new Gson().fromJson(String.valueOf(Singleton.getInstance().drone_js),Drone.class);
+        Medication medication = new Gson().fromJson(String.valueOf(Singleton.getInstance().medication_js),Medication.class);
+        switch (drone.getModel()){
+            case "Lightweight"://Medication weight 100gr
+                if (medication.getWeight()<=100) return false;
+                break;
+            case  "Middleweight"://Medication weight 200gr
+                if (medication.getWeight()<=200) return false;
+                break;
+            case  "Cruiserweight"://Medication weight 300gr
+                if (medication.getWeight()<=300) return false;
+                break;
+            case "Heavyweight"://Medication weight 500gr
+                if (medication.getWeight()<=500) return false;
+                break;
+        }
 
         return true;
     }
