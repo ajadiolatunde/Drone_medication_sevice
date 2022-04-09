@@ -92,11 +92,18 @@ public class Traffichandler  {
                             return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.invalid_load_request);
 
                         }else {
+                            //Data sent are valid can be extracted from singleton variable
+                            int battery_level = Singleton.getInstance().drone_js.getInt("capacity");
+                            if (battery_level<Util.MIN_BATTERY_LEVEL){
+                                //Prevent the dispatch request due to low battery level
 
-                            if (Util.isOverWeight()){
+                                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.battery_level_is_low);
+
+                            }else if (Util.isOverWeight()){
                                 return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.medication_is_over_drone_capacity);
 
                             }else {
+                                //Todo :add record to dispath table and update both drone and medication
                                 return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, MIME_JSON, Transanction_messages.loading);
                             }
 
@@ -167,27 +174,5 @@ public class Traffichandler  {
 
     }
 
-    public static class BatteryLevelHandler extends RouterNanoHTTPD.GeneralHandler{
-        @Override
-        public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
-            if (session.getParms().containsKey("json")){
-                //Todo
-                String data = session.getParms().get("json");
-                if (!Util.isDataJson(data)){
-                    return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.bad_syntax);
 
-                }else{
-                    return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.bad_syntax);
-
-                }
-
-            }else{
-            return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_PLAINTEXT," ");
-            }
-        }
-        @Override
-        public NanoHTTPD.Response post(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
-            return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_PLAINTEXT," ");
-        }
-    }
 }

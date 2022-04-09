@@ -115,12 +115,8 @@ public class SqlQuery {
             }
             i++;
         }
-
         if (sendItemList)return js;
         return i;
     }
-
     //Query to get single medication with code
-
-
 }

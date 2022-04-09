@@ -15,6 +15,7 @@ import java.util.List;
 public class Util {
     static String[] STATE={"IDLE", "LOADING", "LOADED", "DELIVERING", "DELIVERED", "RETURNING"};
     public static String[] MODELS ={"Lightweight", "Middleweight", "Cruiserweight", "Heavyweight"};
+    public static int MIN_BATTERY_LEVEL = 25 ;//50%
     public static String getUserDir(){
         final String dir = System.getProperty("user.dir");
         return  dir+"/src/main/resources";
@@ -73,16 +74,11 @@ public class Util {
     //Ensure recieved data is proper json object
 
     public static boolean isDataJson(String data, boolean isregistration_task){
-        System.out.println("------"+data);
 
         try{
             JSONObject jsonObject = new JSONObject(data);
-            System.out.println(jsonObject);
             //Registring a new drone
             if (isregistration_task){
-                System.out.println("Checking fields");
-                System.out.println(jsonObject.keySet());
-
                 // Check all drone field members
                 ArrayList<String> jsfields = new ArrayList<>();
                 for (String key :jsonObject.keySet()){
@@ -125,15 +121,11 @@ public class Util {
             JSONObject jsonObject = new JSONObject(data);
             Drone drone = new Gson().fromJson(String.valueOf(jsonObject),Drone.class);
             if (drone.getWeight()>500){
-                System.out.println("Problem weight");
-
                 return  false;
             }else if(drone.getSerial_number().length()>100){
-                System.out.println("Problem serial");
 
                 return false;
             }else if (drone.getBattery_capacity()>100 || drone.getBattery_capacity()<0){
-                System.out.println("Problem capacity");
 
                 return false;
             }else if (!models.contains( drone.getModel())){
@@ -149,7 +141,6 @@ public class Util {
     public static boolean isDuplicateEntry(String data) throws SQLException {
         //TODO
         Drone drone = new Gson().fromJson(data,Drone.class);
-        System.out.println("Getting serial "+drone.getSerial_number());
         int rowcount = (int)SqlQuery.getItem(drone.getSerial_number(),"Drone",false) ;
         if (rowcount>0){
             return true;
@@ -161,18 +152,15 @@ public class Util {
     public static boolean isDroneMedicationValid(String data) throws SQLException {
         Singleton singleton = Singleton.getInstance();
         Item item = new Gson().fromJson(data,Item.class);
-        System.out.println("----Util line 164-----"+item.getDrone()+" "+item.getMedication());
-        System.out.println("----here--165---"+data);
-
 
         singleton.drone_js = (JSONObject) SqlQuery.getItem(item.getDrone(),"Drone",true) ;
         singleton.medication_js = (JSONObject) SqlQuery.getItem(item.getMedication(),"Medication",true) ;
-        System.out.println("----here---170--"+singleton.drone_js);
-        System.out.println("----here---171--"+singleton.medication_js);
-
 
         //Validity check here
+        //if valid ,drone and medication details are stored in singleton for later use
         if (singleton.drone_js.names().length()>0 && singleton.medication_js.names().length()>0){
+            singleton.selected_drone = new Gson().fromJson(String.valueOf(singleton.drone_js),Drone.class);
+
             return true;
         }
 
@@ -201,9 +189,6 @@ public class Util {
         return true;
     }
 
-    public  static int get_battery_level(Drone drone){
-        return 1;
-    }
 
 
 }

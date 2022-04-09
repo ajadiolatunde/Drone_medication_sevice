@@ -10,6 +10,7 @@ public class Transanction_messages {
     public static String success  = "{\"status\":\"success\",\"message\":\"Entry successful\"}";
     public static String loading = "{\"status\":\"success\",\"message\":\"Status changed to loading\"}";
     public static String medication_is_over_drone_capacity = "{\"status\":\"failed\",\"message\":\"Drone failed the required  capacity\"}";
+    public static String battery_level_is_low =  "{\"status\":\"failed\",\"message\":\"Drone is not cleared to dispatch due to low battery level\"}";
 
 
 

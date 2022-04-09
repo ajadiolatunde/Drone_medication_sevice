@@ -22,16 +22,12 @@ public class Solution extends RouterNanoHTTPD {
         addRoute("/register",Traffichandler.RegistrationHandler.class);
         addRoute("/selectdronemedication",Traffichandler.AvailableDroneHandler.class);
         addRoute("/loaditems",Traffichandler.ItemHandler.class);
-        addRoute("/batterylevel",Traffichandler.BatteryLevelHandler.class);
         addRoute("/image",Traffichandler.FileHandler.class);
-
-
     }
 
     public static void main(String[] args) throws Exception {
         Singleton.getInstance();
         Util.preloadDb();
-        //int g =(int) SqlQuery.getItem("40734567","Drone",false);
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
