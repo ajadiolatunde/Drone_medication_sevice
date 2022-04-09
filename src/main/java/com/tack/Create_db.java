@@ -16,6 +16,9 @@ public class Create_db {
 
         stmt.addBatch(SqlQuery.sql_medication);
         System.out.println("A new TABLE MEDICATION has been created.");
+
+        stmt.addBatch(SqlQuery.sql_dispatch);
+        System.out.println("A new TABLE DISPATCH has been created.");
         stmt.executeBatch();
         conn.commit();
 

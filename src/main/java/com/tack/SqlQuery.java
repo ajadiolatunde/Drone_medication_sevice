@@ -6,18 +6,19 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class SqlQuery {
-    public static String url = "jdbc:sqlite:/home/olatunde/IdeaProjects/thack4/src/main/resources/" + "ola.db";
+    public static String url = "jdbc:sqlite:"+Util.getUserDir()+ "/ola.db";
+
 
     public static String sql_drone = "CREATE TABLE IF NOT EXISTS Drone " +
-            "(drone_id INT IDENTITY(1,1) PRIMARY KEY," +
-            " serial_number  varchar(100) not null UNIQUE, " +
+            "(drone_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            " serial_number  varchar(20) not null UNIQUE, " +
             " model  varchar(20)  not null, " +
             " weight  int," +
             " state  varchar(20), " +
             " capacity  int  not null)";
 
     public static String sql_medication = "CREATE TABLE IF NOT EXISTS Medication " +
-            "(medics_id INT IDENTITY(1,1)  PRIMARY KEY," +
+            "(medics_id INTEGER PRIMARY KEY AUTOINCREMENT," +
             " name  varchar(20)  not null, " +
             " code  varchar(10)  not null UNIQUE, " +
             " weight   int   not  null, " +
@@ -27,7 +28,7 @@ public class SqlQuery {
             "(id INT IDENTITY(1,1)  PRIMARY KEY," +
             " code  varchar(10) , " +
             " serial_number   varchar(100), " +
-            " date  date() " +
+            " created_date  date not null, " +
             " status varchar(20) not null, " +
             " FOREIGN KEY (code) REFERENCES Medication(code), "+
             " FOREIGN KEY (serial_number) REFERENCES Drone(serial_number))";
@@ -45,9 +46,11 @@ public class SqlQuery {
         return conn;
     }
 
+    //Todo filter status
     public static String view_drones_medication() throws SQLException{
         Connection conn = db_connect();
         Statement stmt = conn.createStatement();
+
         String d_query = "select * from Drone";
         String m_query = "select * from Medication";
         ResultSet m_resultSet = stmt.executeQuery(m_query);
@@ -57,6 +60,7 @@ public class SqlQuery {
             Medication medication = new Medication(m_resultSet.getString(2),m_resultSet.getString(3),Integer.valueOf(m_resultSet.getString(4)),m_resultSet.getString(5));
             medicationArrayList.add(medication);
         }
+
         ResultSet d_result =  stmt.executeQuery(d_query);
         ArrayList<Drone> droneArrayList = new ArrayList<>();
         while (d_result.next()){
@@ -70,49 +74,47 @@ public class SqlQuery {
 
     }
 
-    public static void insert_data(Object obj) throws SQLException,ClassNotFoundException {
-       String query = null;
-       if (obj instanceof Drone){
+    public static void insert_data(Object obj)  {
+        String query = null;
+        if (obj instanceof Drone){
            Drone drone = (Drone) obj;
-           System.out.println(drone.getModel()+"---"+drone.getState());
-
-           query =  "insert into Drone(serial_number,model,weight,state,capacity) values ("+drone.getSerial_number()+",'"+drone.getModel()+"',"+drone.getWeight()+",'"+drone.getState()+"',"+drone.getBattery_capacity()+")";
+           query =  "insert into Drone(serial_number,model,weight,state,capacity) values ('"+drone.getSerial_number()+"','"+drone.getModel()+"',"+drone.getWeight()+",'"+drone.getState()+"',"+drone.getBattery_capacity()+")";
        }
        if (obj instanceof Medication){
            Medication medication = (Medication) obj;
            query = "insert into Medication(weight,code,name,image) values ("+medication.getWeight() +",'"+medication.getCode()+"','"+medication.getName()+"','"+medication.getImage()+"')";
        }
-
-        System.out.println("Opened database successfully");
-        System.out.println(query);
-        Connection conn = db_connect();
-        Statement stmt = conn.createStatement();
+        try {
+            Connection conn = db_connect();
+            Statement stmt = conn.createStatement();
         stmt.executeUpdate(query);
         stmt.close();
         conn.close();
+
+        }catch (Exception e){
+           // e.printStackTrace();
+        }
     }
 
-    //Query to get single drone or medication.
+    //Query to retrieve  single drone or medication.
     public static Object getItem(String id,String table,boolean sendItemList) throws SQLException {
         Connection conn = db_connect();
-        PreparedStatement pstmt = conn.prepareStatement(" select * from "+table+" where serial_number = ?");
+        String searchcolumn = (table == "Drone")?"serial_number":"code";
+        PreparedStatement pstmt = conn.prepareStatement(" select * from "+table+" where "+searchcolumn+" = ?");
 
         pstmt.setString(1, id);
         ResultSet results = pstmt.executeQuery();
         ResultSetMetaData rsmd = results.getMetaData();
-        //getting the column type
+        //Get the column type
         int column_count = rsmd.getColumnCount();
-        System.out.println("Column count "+column_count);
         JSONObject js = new JSONObject();
         int i = 0;
         while(results.next()) {
             for (int x = 2 ;x<=column_count;x++) {
                 js.put(rsmd.getColumnName(x), results.getString(x));
-                System.out.println(rsmd.getColumnName(x)+":"+  results.getString(x));
             }
             i++;
         }
-        System.out.println("Column js---- "+js);
 
         if (sendItemList)return js;
         return i;

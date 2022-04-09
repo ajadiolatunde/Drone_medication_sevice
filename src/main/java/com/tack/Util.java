@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.ls.LSInput;
 
+import java.io.*;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -19,21 +20,48 @@ public class Util {
         return  dir+"/src/main/resources";
     }
 
-    public static void preloadDb() throws SQLException,ClassNotFoundException {
-        Create_db create_db = new Create_db();
-        Drone drone = new Drone();
-        drone.setModel("RED");
-        drone.setBattery_capacity(90);
-        drone.setSerial_number("40734567");
-        drone.setWeight(34);
-        drone.setState("AVAILABLE");
-        Medication medication = new Medication();
-        medication.setCode("fe3456");
-        medication.setWeight(39);
-        medication.setName("Panadol");
-        medication.setImage("ddfdrre343");
-       // SqlQuery.insert_data(drone);
-        //SqlQuery.insert_data(medication);
+    public static ArrayList<Object> loadDataFromCsvFile(){
+        File file = new File(getUserDir(),"data.csv");
+        ArrayList<Object> arrayList = new ArrayList<>();
+
+        try {
+            BufferedReader csvreader = new BufferedReader(new FileReader(file));
+            String row;
+            while ((row = csvreader.readLine()) != null){
+                String[] data = row.split(",");
+                switch (data.length){
+                    case 4://Medication
+                        Medication medication = new Medication(data[0],data[2],Integer.valueOf(data[1]),data[3]);
+                        arrayList.add(medication);
+                        break;
+                    case 5://Drone
+                        Drone drone = new Drone(data[1],data[2],Integer.valueOf(data[0]),data[4],Integer.valueOf(data[3]));
+                         arrayList.add(drone);
+                        break;
+
+                }
+
+            }
+        }catch (FileNotFoundException e){
+                e.printStackTrace();
+        }catch (IOException e){
+            e.printStackTrace();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return arrayList;
+    }
+
+    public static void preloadDb() throws Exception {
+        new Create_db();
+        ArrayList<Object> objectArrayList = loadDataFromCsvFile();
+        System.out.println("-------------------1------------------------");
+
+        for (Object obj:objectArrayList){
+               SqlQuery.insert_data(obj);
+        }
+
     }
 
     /**
@@ -133,8 +161,15 @@ public class Util {
     public static boolean isDroneMedicationValid(String data) throws SQLException {
         Singleton singleton = Singleton.getInstance();
         Item item = new Gson().fromJson(data,Item.class);
-        singleton.drone_js = (JSONObject) SqlQuery.getItem(item.getDrone_serialnumber(),"Drone",true) ;
-        singleton.medication_js = (JSONObject) SqlQuery.getItem(item.getDrone_serialnumber(),"Medication",true) ;
+        System.out.println("----Util line 164-----"+item.getDrone()+" "+item.getMedication());
+        System.out.println("----here--165---"+data);
+
+
+        singleton.drone_js = (JSONObject) SqlQuery.getItem(item.getDrone(),"Drone",true) ;
+        singleton.medication_js = (JSONObject) SqlQuery.getItem(item.getMedication(),"Medication",true) ;
+        System.out.println("----here---170--"+singleton.drone_js);
+        System.out.println("----here---171--"+singleton.medication_js);
+
 
         //Validity check here
         if (singleton.drone_js.names().length()>0 && singleton.medication_js.names().length()>0){

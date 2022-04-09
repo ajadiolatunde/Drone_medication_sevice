@@ -23,22 +23,22 @@ public class Solution extends RouterNanoHTTPD {
         addRoute("/selectdronemedication",Traffichandler.AvailableDroneHandler.class);
         addRoute("/loaditems",Traffichandler.ItemHandler.class);
         addRoute("/batterylevel",Traffichandler.BatteryLevelHandler.class);
-        addRoute("/image/*",Traffichandler.FileHandler.class);
+        addRoute("/image",Traffichandler.FileHandler.class);
 
-        // todo
+
     }
 
-    public static void main(String[] args) throws SQLException,ClassNotFoundException {
-        Singleton singleton = Singleton.getInstance();
+    public static void main(String[] args) throws Exception {
+        Singleton.getInstance();
         Util.preloadDb();
-        int g =(int) SqlQuery.getItem("40734567","Drone",false);
+        //int g =(int) SqlQuery.getItem("40734567","Drone",false);
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try{
                 new Solution();
                 }catch (IOException e){
-
+                  e.printStackTrace();
                 }
             }
         });

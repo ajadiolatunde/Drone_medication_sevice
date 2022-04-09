@@ -60,21 +60,15 @@ public class Traffichandler  {
         public NanoHTTPD.Response.IStatus getStatus() {
             return NanoHTTPD.Response.Status.OK;
         }
+
+
     }
 
     public static class ItemHandler extends RouterNanoHTTPD.GeneralHandler {
-        /**
-         * First confirm proper json data  , and compare the selected drone capacity with  medication weight.
-         *
-         * @param uriResource
-         * @param urlParams
-         * @param session
-         * @method isDroneMedicationValid
-         * @return
-         */
+
         //Load medication into drone
         //Expecting json format {drone:serial_number,medication:code}
-        //Prefect drone overweight
+        //Prevent drone overweight
 
         @Override
         public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
@@ -84,17 +78,21 @@ public class Traffichandler  {
         @Override
         public NanoHTTPD.Response post(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
             //Expecting json formatted data in the parameter key "json"
-            if (session.getParameters().containsKey("json")){
-                String data = session.getParameters().get("json").get(0);
+            if (session.getParms().containsKey("json")){
+                String data = session.getParms().get("json");
+
                 if (!Util.isDataJson(data,false)){
                     return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.bad_syntax);
                 //Presumed only an item can be loaded ,therefore expect a drone serialid with matching item weight
                 }else {
+
                     try {
                         if (!Util.isDroneMedicationValid(data)){
+
                             return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.invalid_load_request);
 
                         }else {
+
                             if (Util.isOverWeight()){
                                 return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.medication_is_over_drone_capacity);
 
@@ -104,6 +102,7 @@ public class Traffichandler  {
 
                         }
                     } catch (SQLException e) {
+
                         e.printStackTrace();
                     }
                 }
@@ -127,8 +126,8 @@ public class Traffichandler  {
         @Override
         public NanoHTTPD.Response post(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
             //Expecting json formatted data in the parameter key "json"
-            if (session.getParameters().containsKey("json")){
-                String data = session.getParameters().get("json").get(0);
+            if (session.getParms().containsKey("json")){
+                String data = session.getParms().get("json");
                 if (!Util.isDataJson(data,true)){
                     return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.bad_syntax);
 
@@ -147,11 +146,7 @@ public class Traffichandler  {
                                 SqlQuery.insert_data(drone);
                                 return newFixedLengthResponse(NanoHTTPD.Response.Status.OK,MIME_JSON,Transanction_messages.success);
 
-                            } catch (SQLException e) {
-                                e.printStackTrace();
-                                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_PLAINTEXT,e.getMessage());
-
-                            } catch (ClassNotFoundException e) {
+                            } catch (Exception e) {
                                 e.printStackTrace();
                                 return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_PLAINTEXT,e.getMessage());
 
@@ -175,9 +170,9 @@ public class Traffichandler  {
     public static class BatteryLevelHandler extends RouterNanoHTTPD.GeneralHandler{
         @Override
         public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
-            if (session.getParameters().containsKey("json")){
+            if (session.getParms().containsKey("json")){
                 //Todo
-                String data = session.getParameters().get("json").get(0);
+                String data = session.getParms().get("json");
                 if (!Util.isDataJson(data)){
                     return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.bad_syntax);
 
