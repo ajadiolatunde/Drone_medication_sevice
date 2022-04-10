@@ -6,6 +6,8 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class SqlQuery {
+    static String ready = "READY";
+    static String gone = "GONE";
     public static String url = "jdbc:sqlite:"+Util.getUserResourceDir()+ "/ola.db";
 
 
@@ -16,20 +18,21 @@ public class SqlQuery {
             " weight  int," +
             " state  varchar(20), " +
             " capacity  int  not null," +
-            "lastmodifiedtime date )";
+            " lastmodifiedtime timestamp default current_timestamp )";
 
     public static String sql_medication = "CREATE TABLE IF NOT EXISTS Medication " +
             "(medics_id INTEGER PRIMARY KEY AUTOINCREMENT," +
             " name  varchar(20)  not null, " +
             " code  varchar(10)  not null UNIQUE, " +
             " weight   int   not  null, " +
-            " image  varchar(50))";
+            " image  varchar(50)" +
+            " state varchar(20) default "+ready+" not null)";
 
     public static String sql_dispatch = "CREATE TABLE IF NOT EXISTS Dispatch " +
             "(id integer PRIMARY KEY AUTOINCREMENT," +
             " code  varchar(10) , " +
             " serial_number   varchar(100), " +
-            " timestamp datetime default CURRENT_TIMESTAMP, " +
+            " dispatchtime timestamp default current_timestamp, " +
             " status varchar(20) not null, " +
             " FOREIGN KEY (code) REFERENCES Medication(code), "+
             " FOREIGN KEY (serial_number) REFERENCES Drone(serial_number))";
@@ -77,6 +80,10 @@ public class SqlQuery {
 
     public static void insert_data(Object obj)  {
         String query = null;
+        String m_up_query = null;
+        String d_up_query = null;
+        Item item = null;
+        boolean updateDroneMedicationTable = false;
         if (obj instanceof Drone){
            Drone drone = (Drone) obj;
            query =  "insert into Drone(serial_number,model,weight,state,capacity) values ('"+drone.getSerial_number()+"','"+drone.getModel()+"',"+drone.getWeight()+",'"+drone.getState()+"',"+drone.getBattery_capacity()+")";
@@ -85,15 +92,41 @@ public class SqlQuery {
            Medication medication = (Medication) obj;
            query = "insert into Medication(weight,code,name,image) values ("+medication.getWeight() +",'"+medication.getCode()+"','"+medication.getName()+"','"+medication.getImage()+"')";
        }
+
+        //Add dispatch details and update Drone status
+        //after all other conditions are met.
+        if (obj instanceof Item){
+            updateDroneMedicationTable = true;
+           item = (Item) obj;
+           query = "insert into Dispatch(code,serial_number) values ("+item.getMedication()+",'"+item.getDrone()+"')";
+           //Todo update other tables
+       }
+        if (updateDroneMedicationTable){
+            d_up_query  = "update Drone set state=? where serial_number=?";
+            m_up_query = "update Medication set state=? where code=?";
+
+        }
         try {
             Connection conn = db_connect();
             Statement stmt = conn.createStatement();
-        stmt.executeUpdate(query);
-        stmt.close();
+            stmt.executeUpdate(query);
+            stmt.close();
+            if (updateDroneMedicationTable){
+                PreparedStatement preparedStatement  = conn.prepareStatement(d_up_query);
+                preparedStatement.setString(1,item.getDrone() );
+                preparedStatement.setString(2,"LOADING" );
+                preparedStatement.executeUpdate();
+                preparedStatement  = conn.prepareStatement(m_up_query);
+                preparedStatement.setString(1,item.getMedication() );
+                preparedStatement.setString(2,gone);
+                preparedStatement.executeQuery();
+                preparedStatement.close();
+            }
+
         conn.close();
 
         }catch (Exception e){
-           // e.printStackTrace();
+           e.printStackTrace();
         }
     }
 
@@ -119,6 +152,5 @@ public class SqlQuery {
         if (sendItemList)return js;
         return i;
     }
-    //TODO
-    //Add dispatch details and update Drone status
+
 }

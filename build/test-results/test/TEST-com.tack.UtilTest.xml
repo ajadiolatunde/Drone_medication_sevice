@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.tack.UtilTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2022-04-10T20:13:21" hostname="vchost" time="0.051">
+  <properties/>
+  <testcase name="isDuplicateEntry()" classname="com.tack.UtilTest" time="0.027"/>
+  <testcase name="getUserResourceDir()" classname="com.tack.UtilTest" time="0.001"/>
+  <testcase name="isRegDataValid()" classname="com.tack.UtilTest" time="0.001"/>
+  <testcase name="preloadDb()" classname="com.tack.UtilTest" time="0.002"/>
+  <testcase name="logAll()" classname="com.tack.UtilTest" time="0.002"/>
+  <testcase name="loadDataFromCsvFile()" classname="com.tack.UtilTest" time="0.003"/>
+  <testcase name="isOverWeight()" classname="com.tack.UtilTest" time="0.002"/>
+  <testcase name="isDroneMedicationValid()" classname="com.tack.UtilTest" time="0.002"/>
+  <testcase name="isDataJson()" classname="com.tack.UtilTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
