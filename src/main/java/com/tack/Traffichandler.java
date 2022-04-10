@@ -94,7 +94,12 @@ public class Traffichandler  {
                         }else {
                             //Data sent are valid can be extracted from singleton variable
                             int battery_level = Singleton.getInstance().drone_js.getInt("capacity");
-                            if (battery_level<Util.MIN_BATTERY_LEVEL){
+                            String status = Singleton.getInstance().drone_js.getString("status");
+                            if (status != "IDLE"){
+                                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.drone_is_not_available);
+
+                            }
+                            else if (battery_level<Util.MIN_BATTERY_LEVEL){
                                 //Prevent the dispatch request due to low battery level
 
                                 return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.battery_level_is_low);

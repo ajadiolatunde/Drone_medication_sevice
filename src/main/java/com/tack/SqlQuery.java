@@ -15,7 +15,8 @@ public class SqlQuery {
             " model  varchar(20)  not null, " +
             " weight  int," +
             " state  varchar(20), " +
-            " capacity  int  not null)";
+            " capacity  int  not null," +
+            "lastmodifiedtime date )";
 
     public static String sql_medication = "CREATE TABLE IF NOT EXISTS Medication " +
             "(medics_id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -25,10 +26,10 @@ public class SqlQuery {
             " image  varchar(50))";
 
     public static String sql_dispatch = "CREATE TABLE IF NOT EXISTS Dispatch " +
-            "(id INT IDENTITY(1,1)  PRIMARY KEY," +
+            "(id integer PRIMARY KEY AUTOINCREMENT," +
             " code  varchar(10) , " +
             " serial_number   varchar(100), " +
-            " created_date  date not null, " +
+            " timestamp datetime default CURRENT_TIMESTAMP, " +
             " status varchar(20) not null, " +
             " FOREIGN KEY (code) REFERENCES Medication(code), "+
             " FOREIGN KEY (serial_number) REFERENCES Drone(serial_number))";
@@ -46,7 +47,7 @@ public class SqlQuery {
         return conn;
     }
 
-    //Todo filter status
+
     public static String view_drones_medication() throws SQLException{
         Connection conn = db_connect();
         Statement stmt = conn.createStatement();
@@ -118,5 +119,6 @@ public class SqlQuery {
         if (sendItemList)return js;
         return i;
     }
-    //Query to get single medication with code
+    //TODO
+    //Add dispatch details and update Drone status
 }

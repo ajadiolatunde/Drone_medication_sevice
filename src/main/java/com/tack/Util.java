@@ -3,8 +3,6 @@ package com.tack;
 import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.ls.LSInput;
-
 import java.io.*;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
@@ -57,8 +55,6 @@ public class Util {
     public static void preloadDb() throws Exception {
         new Create_db();
         ArrayList<Object> objectArrayList = loadDataFromCsvFile();
-        System.out.println("-------------------1------------------------");
-
         for (Object obj:objectArrayList){
                SqlQuery.insert_data(obj);
         }
@@ -107,12 +103,6 @@ public class Util {
         }
     }
 
-    //Ensure request to obtain a drone records is json formatted
-    public static boolean isDataJson(String data){
-        //Todo
-        return true;
-    }
-
     //check drone data field compliance
     public static boolean isRegDataValid(String data){
         List<String> models = Arrays.asList(MODELS);
@@ -139,7 +129,7 @@ public class Util {
     }
     //This prevent duplicate entry and hide sql constraint error message
     public static boolean isDuplicateEntry(String data) throws SQLException {
-        //TODO
+
         Drone drone = new Gson().fromJson(data,Drone.class);
         int rowcount = (int)SqlQuery.getItem(drone.getSerial_number(),"Drone",false) ;
         if (rowcount>0){
@@ -152,7 +142,6 @@ public class Util {
     public static boolean isDroneMedicationValid(String data) throws SQLException {
         Singleton singleton = Singleton.getInstance();
         Item item = new Gson().fromJson(data,Item.class);
-
         singleton.drone_js = (JSONObject) SqlQuery.getItem(item.getDrone(),"Drone",true) ;
         singleton.medication_js = (JSONObject) SqlQuery.getItem(item.getMedication(),"Medication",true) ;
 
