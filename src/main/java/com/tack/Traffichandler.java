@@ -15,13 +15,12 @@ import static fi.iki.elonen.NanoHTTPD.newFixedLengthResponse;
 
 public class Traffichandler  {
     private static final String MIME_JSON = "application/json";
-
     public static class FileHandler extends RouterNanoHTTPD.GeneralHandler {
         @Override
         public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
             System.out.println(session.getUri());
             FileInputStream fis = null;
-            File file = new File(Util.getUserDir(), "images/ola.jpg");
+            File file = new File(Util.getUserResourceDir(), "images/ola.jpg");
             System.out.println(file.toString());
             try {
                 if (file.exists()){
@@ -44,9 +43,13 @@ public class Traffichandler  {
         @Override
         public String getText() {
             try {
+                //Todo
+                //Util.logAll(this.getData().toString(),);
                 return SqlQuery.view_drones_medication();
             } catch (SQLException e) {
+
                 e.printStackTrace();
+
                 return e.getMessage();
             }
         }
@@ -72,58 +75,61 @@ public class Traffichandler  {
 
         @Override
         public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+            Util.logAll(session.getMethod().name(),session.getUri(),NanoHTTPD.Response.Status.BAD_REQUEST.toString(),"error");
             return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_PLAINTEXT," ");
         }
 
         @Override
         public NanoHTTPD.Response post(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
             //Expecting json formatted data in the parameter key "json"
-            if (session.getParms().containsKey("json")){
-                String data = session.getParms().get("json");
+            String data = " ";
+            if (session.getParms().containsKey("json")) {
+                data = session.getParms().get("json");
 
-                if (!Util.isDataJson(data,false)){
-                    return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.bad_syntax);
-                //Presumed only an item can be loaded ,therefore expect a drone serialid with matching item weight
-                }else {
+                if (!Util.isDataJson(data, false)) {
+                    return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.bad_syntax(data,session.getUri()));
+                    //Presumed only an item can be loaded ,therefore expect a drone serialid with matching item weight
+                } else {
 
                     try {
-                        if (!Util.isDroneMedicationValid(data)){
+                        if (!Util.isDroneMedicationValid(data)) {
 
-                            return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.invalid_load_request);
+                            return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.invalid_load_request(data,session.getUri()));
 
-                        }else {
+                        } else {
                             //Data sent are valid can be extracted from singleton variable
                             int battery_level = Singleton.getInstance().drone_js.getInt("capacity");
-                            String status = Singleton.getInstance().drone_js.getString("status");
-                            if (status != "IDLE"){
-                                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.drone_is_not_available);
+                            String status = Singleton.getInstance().drone_js.getString("state");
+                            if (status != "IDLE") {
+                                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.drone_is_not_available(data,session.getUri()));
 
-                            }
-                            else if (battery_level<Util.MIN_BATTERY_LEVEL){
+                            } else if (battery_level < Util.MIN_BATTERY_LEVEL) {
                                 //Prevent the dispatch request due to low battery level
 
-                                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.battery_level_is_low);
+                                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.battery_level_is_low(data,session.getUri()));
 
-                            }else if (Util.isOverWeight()){
-                                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.medication_is_over_drone_capacity);
+                            } else if (Util.isOverWeight()) {
+                                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.medication_is_over_drone_capacity(data,session.getUri()));
 
-                            }else {
-                                //Todo :add record to dispath table and update both drone and medication
-                                return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, MIME_JSON, Transanction_messages.loading);
+                            } else {
+                                //Todo :add record to dispatch table and update both drone and medication
+
+                                return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, MIME_JSON, Transanction_messages.loading(data,session.getUri()));
                             }
 
                         }
                     } catch (SQLException e) {
 
                         e.printStackTrace();
+                        return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.key_not_found(data,session.getUri()));
+
                     }
                 }
 
-            }else{
-                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.key_not_found);
+            } else {
+                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.key_not_found(data,session.getUri()));
 
             }
-            return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.key_not_found);
 
         }
 
@@ -132,52 +138,56 @@ public class Traffichandler  {
     public static class RegistrationHandler extends RouterNanoHTTPD.GeneralHandler {
         @Override
         public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
-            return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_PLAINTEXT," ");
+            Util.logAll(session.getParms().entrySet().toString(),session.getUri(),NanoHTTPD.Response.Status.BAD_REQUEST.toString(),"error");
+            return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_PLAINTEXT, " ");
         }
 
         @Override
         public NanoHTTPD.Response post(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
             //Expecting json formatted data in the parameter key "json"
-            if (session.getParms().containsKey("json")){
-                String data = session.getParms().get("json");
-                if (!Util.isDataJson(data,true)){
-                    return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.bad_syntax);
+            String data = " ";
+            if (session.getParms().containsKey("json")) {
+                data = session.getParms().get("json");
+                if (!Util.isDataJson(data, true)) {
+                    return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.bad_syntax(data,session.getUri()));
 
-                }else if (!Util.isRegDataValid(data)){
-                    return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.invalid_field_data);
+                } else if (!Util.isRegDataValid(data)) {
+                    return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.invalid_field_data(data,session.getUri()));
 
-                }else {
+                } else {
                     try {
-                        if (Util.isDuplicateEntry(data)){
+                        if (Util.isDuplicateEntry(data)) {
 
-                            return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.duplicate_serial_number);
+                            return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.duplicate_serial_number(data,session.getUri()));
 
-                        }else{
-                            Drone drone = new Gson().fromJson(data,Drone.class);
+                        } else {
+                            Drone drone = new Gson().fromJson(data, Drone.class);
                             try {
                                 SqlQuery.insert_data(drone);
-                                return newFixedLengthResponse(NanoHTTPD.Response.Status.OK,MIME_JSON,Transanction_messages.success);
+                                return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, MIME_JSON, Transanction_messages.success(data,session.getUri()));
 
                             } catch (Exception e) {
+                                //Todo
                                 e.printStackTrace();
-                                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_PLAINTEXT,e.getMessage());
+                                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_PLAINTEXT, e.getMessage());
 
                             }
                         }
                     } catch (SQLException e) {
                         e.printStackTrace();
+                        //Todo
+                        return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_PLAINTEXT, e.getMessage());
+
                     }
                 }
 
-            }else{
-                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.key_not_found);
+            } else {
+                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.key_not_found(data,session.getUri()));
 
             }
 
-            return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,Transanction_messages.key_not_found);
+
         }
 
     }
-
-
 }

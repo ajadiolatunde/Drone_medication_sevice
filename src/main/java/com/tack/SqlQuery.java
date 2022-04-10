@@ -6,7 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class SqlQuery {
-    public static String url = "jdbc:sqlite:"+Util.getUserDir()+ "/ola.db";
+    public static String url = "jdbc:sqlite:"+Util.getUserResourceDir()+ "/ola.db";
 
 
     public static String sql_drone = "CREATE TABLE IF NOT EXISTS Drone " +

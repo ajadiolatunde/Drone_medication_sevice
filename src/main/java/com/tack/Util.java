@@ -9,18 +9,21 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class Util {
     static String[] STATE={"IDLE", "LOADING", "LOADED", "DELIVERING", "DELIVERED", "RETURNING"};
     public static String[] MODELS ={"Lightweight", "Middleweight", "Cruiserweight", "Heavyweight"};
     public static int MIN_BATTERY_LEVEL = 25 ;//50%
-    public static String getUserDir(){
+    public static String getUserResourceDir(){
         final String dir = System.getProperty("user.dir");
         return  dir+"/src/main/resources";
     }
 
     public static ArrayList<Object> loadDataFromCsvFile(){
-        File file = new File(getUserDir(),"data.csv");
+        File file = new File(getUserResourceDir(),"data.csv");
         ArrayList<Object> arrayList = new ArrayList<>();
 
         try {
@@ -176,6 +179,35 @@ public class Util {
         }
 
         return true;
+    }
+    //TODO
+    //Log all request
+    public static void logAll(String log,String url,String response,String type){
+        Logger logger = Logger.getLogger("Logs");
+        FileHandler fileHandler;
+        try {
+            fileHandler = new FileHandler(new File(getUserResourceDir(),"ola.log").toString());
+            logger.addHandler(fileHandler);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fileHandler.setFormatter(formatter);
+            switch (type){
+                case "info":
+                    logger.info(url+"::"+log+"::"+response);
+                    break;
+                case "error":
+                    logger.severe(url+"::"+log+"::"+response);
+                    break;
+                case "fine":
+                    logger.fine(url+"::"+log+"::"+response);
+
+            }
+
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 
