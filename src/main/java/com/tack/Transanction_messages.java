@@ -43,13 +43,13 @@ public class Transanction_messages {
 
     public static String success(String request_data,String url){
         JSONObject response = getMessage("Entry successful","success");
-        Util.logAll(request_data,url,response.getString("message"),"fine");
+        Util.logAll(request_data,url,response.getString("message"),"info");
         return response.toString();
     }
 
     public static String loading(String request_data,String url){
         JSONObject response = getMessage("Status changed to loading","success");
-        Util.logAll(request_data,url,response.getString("message"),"fine");
+        Util.logAll(request_data,url,response.getString("message"),"info");
         return response.toString();
      }
 
@@ -66,7 +66,7 @@ public class Transanction_messages {
     }
 
     public static String drone_is_not_available(String request_data,String url){
-        JSONObject response = getMessage("Selected drone cant be engaged","failed");
+        JSONObject response = getMessage("Selected drone is not available","failed");
         Util.logAll(request_data,url,response.getString("message"),"info");
         return response.toString();
     }

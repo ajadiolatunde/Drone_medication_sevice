@@ -25,8 +25,9 @@ public class SqlQuery {
             " name  varchar(20)  not null, " +
             " code  varchar(10)  not null UNIQUE, " +
             " weight   int   not  null, " +
-            " image  varchar(50)" +
-            " state varchar(20) default "+ready+" not null)";
+            " image  varchar(50)," +
+            " state varchar(20) default " +"'"+ready+"'"+" not null)";
+
 
     public static String sql_dispatch = "CREATE TABLE IF NOT EXISTS Dispatch " +
             "(id integer PRIMARY KEY AUTOINCREMENT," +
@@ -51,7 +52,7 @@ public class SqlQuery {
     }
 
 
-    public static String view_drones_medication() throws SQLException{
+    public static String view_drones_medication(String requestUrl) throws SQLException{
         Connection conn = db_connect();
         Statement stmt = conn.createStatement();
 
@@ -71,7 +72,7 @@ public class SqlQuery {
             Drone drone = new Drone(d_result.getString(2),d_result.getString(3),Integer.valueOf(d_result.getString(4)),d_result.getString(5),Integer.valueOf(d_result.getString(6)));
             droneArrayList.add(drone);
         }
-        String js_result = new Jasonparser().getAllRecords(droneArrayList,medicationArrayList);
+        String js_result = new Jasonparser().getAllRecords(droneArrayList,medicationArrayList,requestUrl);
         stmt.close();
         conn.close();
         return js_result;
@@ -98,30 +99,28 @@ public class SqlQuery {
         if (obj instanceof Item){
             updateDroneMedicationTable = true;
            item = (Item) obj;
-           query = "insert into Dispatch(code,serial_number) values ("+item.getMedication()+",'"+item.getDrone()+"')";
+           //
+           String status = "LOADING";
+           query = "insert into Dispatch(code,serial_number,status) values ("+"'"+item.getMedication()+"',"+"'"+item.getDrone()+"',"+"'"+status+"')";
+           System.out.println("----"+query+"----------");
            //Todo update other tables
        }
         if (updateDroneMedicationTable){
-            d_up_query  = "update Drone set state=? where serial_number=?";
-            m_up_query = "update Medication set state=? where code=?";
-
+            d_up_query  = "update Drone set state="+"'LOADING'"+" where serial_number='"+item.getDrone()+"'";
+            m_up_query = "update Medication set state="+"'LOADING'"+" where code='"+item.getMedication()+"'";
         }
         try {
             Connection conn = db_connect();
             Statement stmt = conn.createStatement();
             stmt.executeUpdate(query);
-            stmt.close();
+            //stmt.close();
             if (updateDroneMedicationTable){
-                PreparedStatement preparedStatement  = conn.prepareStatement(d_up_query);
-                preparedStatement.setString(1,item.getDrone() );
-                preparedStatement.setString(2,"LOADING" );
-                preparedStatement.executeUpdate();
-                preparedStatement  = conn.prepareStatement(m_up_query);
-                preparedStatement.setString(1,item.getMedication() );
-                preparedStatement.setString(2,gone);
-                preparedStatement.executeQuery();
-                preparedStatement.close();
+                int result = stmt.executeUpdate(d_up_query);
+                System.out.println(result);
+                stmt.executeUpdate(m_up_query);
+                stmt.close();
             }
+            if (stmt != null)stmt.close();
 
         conn.close();
 

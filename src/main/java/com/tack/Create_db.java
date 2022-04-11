@@ -15,6 +15,7 @@ public class Create_db {
         System.out.println("A new TABLE DRONE has been created.");
 
         stmt.addBatch(SqlQuery.sql_medication);
+        System.out.println(SqlQuery.sql_medication);
         System.out.println("A new TABLE MEDICATION has been created.");
 
         stmt.addBatch(SqlQuery.sql_dispatch);

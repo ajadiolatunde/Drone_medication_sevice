@@ -16,6 +16,7 @@ import java.util.logging.SimpleFormatter;
 public class Util {
     static String[] STATE={"IDLE", "LOADING", "LOADED", "DELIVERING", "DELIVERED", "RETURNING"};
     public static String[] MODELS ={"Lightweight", "Middleweight", "Cruiserweight", "Heavyweight"};
+    private static final String LOGS = "ola.log";
     public static int MIN_BATTERY_LEVEL = 25 ;//50%
     public static String getUserResourceDir(){
         final String dir = System.getProperty("user.dir");
@@ -55,11 +56,15 @@ public class Util {
         return arrayList;
     }
 
-    public static void preloadDb() throws Exception {
-        new Create_db();
-        ArrayList<Object> objectArrayList = loadDataFromCsvFile();
-        for (Object obj:objectArrayList){
-               SqlQuery.insert_data(obj);
+    public static void preloadDb()  {
+        try {
+            new Create_db();
+            ArrayList<Object> objectArrayList = loadDataFromCsvFile();
+            for (Object obj : objectArrayList) {
+                SqlQuery.insert_data(obj);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
 
     }
@@ -184,10 +189,11 @@ public class Util {
     //Log all request
     public static void logAll(String log,String url,String response,String type){
         Logger logger = Logger.getLogger("Logs");
+
         FileHandler fileHandler;
         try {
-            fileHandler = new FileHandler(new File(getUserResourceDir(),"ola.log").toString());
-            logger.addHandler(fileHandler);
+            fileHandler = new FileHandler(new File(Util.getUserResourceDir(), LOGS).toString());
+            logger.addHandler( fileHandler);
             SimpleFormatter formatter = new SimpleFormatter();
             fileHandler.setFormatter(formatter);
             switch (type){
@@ -199,9 +205,7 @@ public class Util {
                     break;
                 case "fine":
                     logger.fine(url+"::"+log+"::"+response);
-
             }
-
         } catch (SecurityException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -209,7 +213,24 @@ public class Util {
         }
 
     }
+    //Form-data paser owing to nanohttp limitation.
+    public static String getFormdata(int contentLength,InputStream inputStream){
+        byte[] buffer = new byte[contentLength];
+        try {
+            inputStream.read(buffer, 0, contentLength);
 
+        } catch (IOException e) {
 
+            e.printStackTrace();
+            return null;
+        }
+        String res= new String(buffer);
+        if (res.contains("form-data")&& res.contains("json")){
+            if (res.contains("{") && res.contains("}")) {
+                return res.substring(res.indexOf("{"), res.lastIndexOf("}") + 1);
+            }
+        }
+        return null;
+    }
 
 }

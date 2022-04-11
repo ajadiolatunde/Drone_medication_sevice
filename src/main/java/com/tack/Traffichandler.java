@@ -7,7 +7,9 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 
 import static fi.iki.elonen.NanoHTTPD.MIME_PLAINTEXT;
@@ -39,29 +41,19 @@ public class Traffichandler  {
     }
 
 
-    public static class AvailableDroneHandler extends RouterNanoHTTPD.DefaultHandler {
+    public static class AvailableDroneHandler extends RouterNanoHTTPD.GeneralHandler {
+
         @Override
-        public String getText() {
+        public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+
+            Util.logAll(session.getMethod().name(),session.getUri(),NanoHTTPD.Response.Status.BAD_REQUEST.toString(),"error");
             try {
-                //Todo
-                //Util.logAll(this.getData().toString(),);
-                return SqlQuery.view_drones_medication();
+                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_JSON,SqlQuery.view_drones_medication("http://"+session.getHeaders().get("host")+"/"));
             } catch (SQLException e) {
-
                 e.printStackTrace();
+                return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_PLAINTEXT,"Bad request");
 
-                return e.getMessage();
             }
-        }
-
-        @Override
-        public String getMimeType() {
-            return MIME_JSON;
-        }
-
-        @Override
-        public NanoHTTPD.Response.IStatus getStatus() {
-            return NanoHTTPD.Response.Status.OK;
         }
 
 
@@ -82,9 +74,10 @@ public class Traffichandler  {
         @Override
         public NanoHTTPD.Response post(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
             //Expecting json formatted data in the parameter key "json"
-            String data = " ";
-            if (session.getParms().containsKey("json")) {
-                data = session.getParms().get("json");
+            Integer contentLength = Integer.parseInt(session.getHeaders().get("content-length"));
+            String data = Util.getFormdata(contentLength,session.getInputStream());
+
+            if (data != null) {
 
                 if (!Util.isDataJson(data, false)) {
                     return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.bad_syntax(data,session.getUri()));
@@ -100,7 +93,7 @@ public class Traffichandler  {
                             //Data sent are valid can be extracted from singleton variable
                             int battery_level = Singleton.getInstance().drone_js.getInt("capacity");
                             String status = Singleton.getInstance().drone_js.getString("state");
-                            if (status != "IDLE") {
+                            if (!status.equals("IDLE")) {
                                 return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.drone_is_not_available(data,session.getUri()));
 
                             } else if (battery_level < Util.MIN_BATTERY_LEVEL) {
@@ -113,7 +106,10 @@ public class Traffichandler  {
 
                             } else {
                                 //Todo :add record to dispatch table and update both drone and medication
-
+                                Item item = new Item();
+                                item.setDrone(Singleton.getInstance().drone_js.getString("serial_number"));
+                                item.setMedication(Singleton.getInstance().medication_js.getString("code"));
+                                SqlQuery.insert_data(item);
                                 return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, MIME_JSON, Transanction_messages.loading(data,session.getUri()));
                             }
 
@@ -145,9 +141,9 @@ public class Traffichandler  {
         @Override
         public NanoHTTPD.Response post(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
             //Expecting json formatted data in the parameter key "json"
-            String data = " ";
-            if (session.getParms().containsKey("json")) {
-                data = session.getParms().get("json");
+            Integer contentLength = Integer.parseInt(session.getHeaders().get("content-length"));
+            String data = Util.getFormdata(contentLength,session.getInputStream());
+            if (data != null) {
                 if (!Util.isDataJson(data, true)) {
                     return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.bad_syntax(data,session.getUri()));
 
