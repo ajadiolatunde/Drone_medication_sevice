@@ -15,7 +15,7 @@ public class Jasonparser {
             drone_js.put(String.valueOf(drone.getSerial_number()),String.valueOf (new Gson().toJson(drone,Drone.class)));
         }
         for (Medication medication:medications){
-            medication.setImage(requestUrl+medication.getImage());
+            medication.setImage(requestUrl+"images?item="+medication.getImage()+".jpg");
             medics_js.put(medication.getCode(),String.valueOf(new Gson().toJson(medication,Medication.class)));
         }
         parent_js.put("drones",drone_js);

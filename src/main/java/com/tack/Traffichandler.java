@@ -3,13 +3,10 @@ package com.tack;
 import com.google.gson.Gson;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 
 import static fi.iki.elonen.NanoHTTPD.MIME_PLAINTEXT;
@@ -20,14 +17,15 @@ public class Traffichandler  {
     public static class FileHandler extends RouterNanoHTTPD.GeneralHandler {
         @Override
         public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
-            System.out.println(session.getUri());
             FileInputStream fis = null;
-            File file = new File(Util.getUserResourceDir(), "images/ola.jpg");
-            System.out.println(file.toString());
+            if (!session.getParms().containsKey("item\\")){
+                return newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, MIME_PLAINTEXT, "File not found");
+            }
+            //Todo
+            File file = new File(Util.getUserResourceDir(), "images/"+session.getParms().get("item\\"));
             try {
                 if (file.exists()){
                     fis = new FileInputStream(file);
-                    System.out.println("Yes file exist");
                     return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "image/jpeg", fis, file.length());
                 } else {
                     return newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, MIME_PLAINTEXT, "File not found");
@@ -144,6 +142,7 @@ public class Traffichandler  {
             Integer contentLength = Integer.parseInt(session.getHeaders().get("content-length"));
             String data = Util.getFormdata(contentLength,session.getInputStream());
             if (data != null) {
+
                 if (!Util.isDataJson(data, true)) {
                     return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, MIME_JSON, Transanction_messages.bad_syntax(data,session.getUri()));
 

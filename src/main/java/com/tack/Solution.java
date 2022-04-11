@@ -22,7 +22,7 @@ public class Solution extends RouterNanoHTTPD {
         addRoute("/register",Traffichandler.RegistrationHandler.class);
         addRoute("/selectdronemedication",Traffichandler.AvailableDroneHandler.class);
         addRoute("/loaditems",Traffichandler.ItemHandler.class);
-        addRoute("/image",Traffichandler.FileHandler.class);
+        addRoute("/images",Traffichandler.FileHandler.class);
     }
 
     public static void main(String[] args) throws Exception {

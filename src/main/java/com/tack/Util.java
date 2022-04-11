@@ -78,7 +78,6 @@ public class Util {
     //Ensure recieved data is proper json object
 
     public static boolean isDataJson(String data, boolean isregistration_task){
-
         try{
             JSONObject jsonObject = new JSONObject(data);
             //Registring a new drone
@@ -106,7 +105,6 @@ public class Util {
             return true;
         }catch (JSONException e){
             System.out.println(e.getMessage());
-
             return false;
         }
     }
