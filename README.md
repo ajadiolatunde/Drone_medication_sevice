@@ -50,14 +50,19 @@ The critical part towards getting  succeful response to every reuqest is by ensu
 
 
 **Entity details:**
-_For drone_
+
+ --For drone--
+
 - serial_number (100 characters max);
 - model (Lightweight, Middleweight, Cruiserweight, Heavyweight);
 - weight limit (500gr max);
 - battery_capacity (percentage);
 - state (IDLE, LOADING, LOADED, DELIVERING, DELIVERED, RETURNING).
 - lastmodified (timestamp)
-  _For medication_
+
+
+  --For medication--
+ 
 - name (allowed only letters, numbers, ‘-‘, ‘_’);
 - weight;
 - code (allowed only upper case letters, underscore and numbers);
