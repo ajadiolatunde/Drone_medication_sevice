@@ -1,2 +1,2 @@
-Apr 12, 2022 1:30:58 AM com.tack.Util logAll
-SEVERE: /selectdronemedication/::POST::BAD_REQUEST
+Apr 12, 2022 1:39:32 PM com.tack.Util logAll
+SEVERE: /selectdronemedication::GET::BAD_REQUEST

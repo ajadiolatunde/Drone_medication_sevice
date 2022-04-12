@@ -155,10 +155,8 @@ public class Util {
         //if valid ,drone and medication details are stored in singleton for later use
         if (singleton.drone_js.names().length()>0 && singleton.medication_js.names().length()>0){
             singleton.selected_drone = new Gson().fromJson(String.valueOf(singleton.drone_js),Drone.class);
-
             return true;
         }
-
         return false;
     }
     //Subject the request to weight test

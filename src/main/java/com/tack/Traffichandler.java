@@ -14,15 +14,17 @@ import static fi.iki.elonen.NanoHTTPD.newFixedLengthResponse;
 
 public class Traffichandler  {
     private static final String MIME_JSON = "application/json";
+
     public static class FileHandler extends RouterNanoHTTPD.GeneralHandler {
         @Override
         public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
             FileInputStream fis = null;
-            if (!session.getParms().containsKey("item\\")){
+            System.out.println(session.getParms().entrySet());
+            if (!session.getParms().containsKey("item")){
                 return newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, MIME_PLAINTEXT, "File not found");
             }
             //Todo
-            File file = new File(Util.getUserResourceDir(), "images/"+session.getParms().get("item\\"));
+            File file = new File(Util.getUserResourceDir(), "images/"+session.getParms().get("item"));
             try {
                 if (file.exists()){
                     fis = new FileInputStream(file);
@@ -82,6 +84,7 @@ public class Traffichandler  {
             //Expecting json formatted data in the parameter key "json"
             Integer contentLength = Integer.parseInt(session.getHeaders().get("content-length"));
             String data = Util.getFormdata(contentLength,session.getInputStream());
+            System.out.println("-------"+session.getParms().entrySet());
 
             if (data != null) {
 
