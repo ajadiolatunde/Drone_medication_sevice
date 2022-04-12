@@ -231,4 +231,9 @@ public class Util {
         return null;
     }
 
+    public static int getBatteryLevel(){
+        int  row_count = (int) SqlQuery.view_battery();
+        return row_count ;
+    }
+
 }

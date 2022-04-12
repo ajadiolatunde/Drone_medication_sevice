@@ -57,6 +57,14 @@ public class Traffichandler  {
 
     }
 
+    public static class ItemLoadedHandler extends RouterNanoHTTPD.GeneralHandler{
+        @Override
+        public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
+            Util.logAll(session.getMethod().name(),session.getUri(),NanoHTTPD.Response.Status.BAD_REQUEST.toString(),"error");
+            return newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,MIME_PLAINTEXT," ");
+        }
+    }
+
     public static class ItemHandler extends RouterNanoHTTPD.GeneralHandler {
 
         //Load medication into drone

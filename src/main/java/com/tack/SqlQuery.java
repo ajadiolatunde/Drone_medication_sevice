@@ -2,8 +2,13 @@ package com.tack;
 
 import org.json.JSONObject;
 
+import javax.swing.plaf.nimbus.State;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Timer;
 
 public class SqlQuery {
     static String ready = "READY";
@@ -151,5 +156,38 @@ public class SqlQuery {
         if (sendItemList)return js;
         return i;
     }
+
+    public static String getLoadedItem(){
+        //Todo
+        return " ";
+    }
+
+    public static Object view_battery(){
+        Connection conn = db_connect();
+        String query = "select serial_number from Drone where capacity<25";
+        try {
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+            int column_count = resultSetMetaData.getColumnCount();
+            int row_count = 0;
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+            LocalDateTime now = LocalDateTime.now();
+            System.out.println("The following devices need charging @"+now );
+            while (resultSet.next()){
+                for (int x = 1 ;x<=column_count;x++) {
+                    //Send notification via mail
+                    System.out.println(resultSetMetaData.getColumnName(x)+":"+ resultSet.getString(x));
+                }
+                row_count++;
+            }
+            return row_count;
+        }catch (SQLException e){
+            e.printStackTrace();
+            return 0;
+        }
+        //TOdo
+    }
+
 
 }

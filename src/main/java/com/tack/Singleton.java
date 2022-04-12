@@ -19,6 +19,8 @@ public class Singleton {
             single_instance = new Singleton();
         return single_instance;
     }
+    //TODO
+    //periodic task to check battery level
 
 
 }

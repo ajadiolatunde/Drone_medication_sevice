@@ -8,8 +8,13 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Solution extends RouterNanoHTTPD {
+    private static final ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
+
     public Solution() throws IOException {
         super(8181);
         addMappings();
@@ -22,10 +27,15 @@ public class Solution extends RouterNanoHTTPD {
         addRoute("/register",Traffichandler.RegistrationHandler.class);
         addRoute("/selectdronemedication",Traffichandler.AvailableDroneHandler.class);
         addRoute("/loaditems",Traffichandler.ItemHandler.class);
+        addRoute("/loadeditem",Traffichandler.ItemLoadedHandler.class);
         addRoute("/images",Traffichandler.FileHandler.class);
     }
 
     public static void main(String[] args) throws Exception {
+
+        if (args.length>0){
+            //TODO
+        }
         Singleton.getInstance();
         Util.preloadDb();
         Thread thread = new Thread(new Runnable() {
@@ -39,6 +49,13 @@ public class Solution extends RouterNanoHTTPD {
             }
         });
         thread.start();
+        Runnable batterylevelchecker = new Runnable() {
+            @Override
+            public void run() {
+                Util.getBatteryLevel();
+            }
+        };
+        service.scheduleAtFixedRate(batterylevelchecker, 10, 10, TimeUnit.SECONDS);
 
     }
 
