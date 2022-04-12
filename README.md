@@ -8,13 +8,15 @@ For test purpose i assumed host to be localhost.
 
 **Sample address** 
  - http://[host address]:8181/[endpoint]
-**Task check with endpoints****
-- registering a drone allows POST method /register
-- loading a drone with medication items GET /selectdronemedication
-- checking loaded medication items for a given drone; /device
-- checking available drones for loading /selectdronemedication
-- check drone battery level for a given drone /selectdronemedication
-- viewing medication item picture /selectdronemedication
+
+**Endpoints**
+
+ - registering a drone allows POST method /register
+ - loading a drone with medication items GET /selectdronemedication
+ - checking loaded medication items for a given drone; /device
+ - checking available drones for loading /selectdronemedication
+ - check drone battery level for a given drone /selectdronemedication
+ - viewing medication item picture /selectdronemedication
 
 Prerequisites
  - Java 11 or newer
